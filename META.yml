@@ -1,0 +1,22 @@
+---
+abstract: 'An atompub server that supports the message queue/bus model.'
+author:
+  - 'Naveed Massjouni <naveed.massjouni@rackspace.com>'
+build_requires: {}
+configure_requires:
+  ExtUtils::MakeMaker: 6.31
+dynamic_config: 0
+generated_by: 'Dist::Zilla version 4.102342, CPAN::Meta::Converter version 2.102400'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: AtomMQ
+requires:
+  Atompub::Server: 0
+  DBI: 0
+  Moose: 0
+  MooseX::NonMoose: 0
+  Test::Exception: 0
+  XML::Atom: 0
+version: 0.0001
