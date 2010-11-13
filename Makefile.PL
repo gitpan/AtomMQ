@@ -21,13 +21,15 @@ my %WriteMakefileArgs = (
   'NAME' => 'AtomMQ',
   'PREREQ_PM' => {
     'Atompub::Server' => '0',
-    'DBI' => '0',
+    'DBD::SQLite' => '0',
+    'DBIx::Class' => '0.08115',
     'Moose' => '0',
     'MooseX::NonMoose' => '0',
+    'SQL::Translator' => '0.11006',
     'Test::Exception' => '0',
     'XML::Atom' => '0'
   },
-  'VERSION' => '0.0001',
+  'VERSION' => '0.0100',
   'test' => {
     'TESTS' => 't/*.t'
   }

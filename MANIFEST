@@ -1,8 +1,12 @@
+Changes
 LICENSE
 MANIFEST
 META.yml
 Makefile.PL
 README
+README.pod
 dist.ini
 lib/AtomMQ.pm
+lib/AtomMQ/Schema.pm
+lib/AtomMQ/Schema/Result/AtomMQEntry.pm
 t/01-basic.t
