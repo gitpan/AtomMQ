@@ -21,6 +21,7 @@ my %WriteMakefileArgs = (
   'NAME' => 'AtomMQ',
   'PREREQ_PM' => {
     'Atompub::Server' => '0',
+    'Capture::Tiny' => '0',
     'DBD::SQLite' => '0',
     'DBIx::Class' => '0.08115',
     'Moose' => '0',
@@ -29,7 +30,7 @@ my %WriteMakefileArgs = (
     'Test::MockObject' => '0',
     'XML::Atom' => '0'
   },
-  'VERSION' => '0.0102',
+  'VERSION' => '0.0200',
   'test' => {
     'TESTS' => 't/*.t'
   }

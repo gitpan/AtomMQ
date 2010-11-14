@@ -14,6 +14,7 @@ meta-spec:
 name: AtomMQ
 requires:
   Atompub::Server: 0
+  Capture::Tiny: 0
   DBD::SQLite: 0
   DBIx::Class: 0.08115
   Moose: 0
@@ -21,4 +22,4 @@ requires:
   SQL::Translator: 0.11006
   Test::MockObject: 0
   XML::Atom: 0
-version: 0.0102
+version: 0.0200
