@@ -26,10 +26,10 @@ my %WriteMakefileArgs = (
     'Moose' => '0',
     'MooseX::NonMoose' => '0',
     'SQL::Translator' => '0.11006',
-    'Test::Exception' => '0',
+    'Test::MockObject' => '0',
     'XML::Atom' => '0'
   },
-  'VERSION' => '0.0100',
+  'VERSION' => '0.0101',
   'test' => {
     'TESTS' => 't/*.t'
   }
