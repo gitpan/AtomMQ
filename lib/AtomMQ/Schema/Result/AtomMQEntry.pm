@@ -12,14 +12,12 @@ __PACKAGE__->add_columns(
         is_auto_increment => 1,
     },
     feed => {
-        data_type => 'varchar',
+        data_type => 'text',
         is_nullable => 0,
-        size => 255,
     },
     title => {
-        data_type => 'varchar',
+        data_type => 'text',
         is_nullable => 0,
-        size => 255,
     },
     content => {
         data_type => 'text',
@@ -42,7 +40,7 @@ AtomMQ::Schema::Result::AtomMQEntry
 
 =head1 VERSION
 
-version 0.0200
+version 0.0300
 
 =head1 ACCESSORS
 
@@ -54,20 +52,18 @@ version 0.0200
 
 =head2 feed
 
-    data_type: 'varchar'
-    is_nullable: 1
-    size: 255
+    data_type: 'text'
+    is_nullable: 0
 
 =head2 title
 
-    data_type: 'varchar'
-    is_nullable: 1
-    size: 255
+    data_type: 'text'
+    is_nullable: 0
 
 =head2 content
 
     data_type: 'text'
-    is_nullable: 1
+    is_nullable: 0
 
 =head1 AUTHOR
 

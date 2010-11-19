@@ -2,13 +2,13 @@ NAME
     AtomMQ - An atompub server that supports the message queue/bus model.
 
 VERSION
-    version 0.0200
+    version 0.0300
 
 SYNOPSIS
         #!/usr/bin/perl
         use AtomMQ;
-        my $dsn = 'dbi:SQLite:dbname=/path/to/foo.db';
-        my $server = AtomMQ->new(feed => 'MyCoolFeed', dsn => $dsn);
+        my $db_info = { dsn => 'dbi:SQLite:dbname=/path/to/foo.db' };
+        my $server = AtomMQ->new(feed => 'MyCoolFeed', db_info => $db_info);
         $server->run;
 
 DESCRIPTION
@@ -50,17 +50,24 @@ DESCRIPTION
 
 METHODS
   new
-    Arguments: $feed, $dsn, $user, $password, $auto_create_db
+    Arguments: $feed, $db_info, $auto_create_db
 
     This is the AtomMQ constructor. The required arguments are $feed and
-    $dsn. $feed is the name of the feed. $dsn should be a valid DBI dsn.
-    $user and $password are optional and should be provided if your database
-    requires them. $auto_create_db defaults to 1. Set it to 0 if you don't
-    want AtomMQ to attempt to create the db table for you. You can leave it
-    set to 1 even if the db table already exists. Setting it to 0 improves
-    performance slightly. See "DATABASE" for more info.
+    $db_info. $feed is the name of the feed. $db_info is a hashref
+    containing the database connection info as described in "connect_info"
+    in DBIx::Class::Storage::DBI. It must at least contain a dsn entry.
+    $auto_create_db defaults to 1. Set it to 0 if you don't want AtomMQ to
+    attempt to create the db table for you. You can leave it set to 1 even
+    if the db table already exists. Setting it to 0 improves performance
+    slightly. See "DATABASE" for more info. Example:
 
-        my $server = AtomMQ->new(feed => 'MyCoolFeed', dsn => $dsn);
+        my $server = AtomMQ->new(feed => 'MyCoolFeed', db_info => {
+            dsn        => 'dbi:SQLite:dbname=/path/to/foo.db',
+            user       => 'joe',
+            password   => 'momma',
+            AutoCommit => 1,
+            RaiseError => 1,
+        });
 
   run
     Arguments: None
@@ -68,9 +75,9 @@ METHODS
     Call this method to start the server.
 
 DATABASE
-    AtomMQ depends on a database to store its data. The dsn you pass to the
-    constructor must point to a database which you have write privileges to.
-    Only one table named atommq_entry is required. This table will be
+    AtomMQ depends on a database to store its data. The db_info you pass to
+    the constructor must point to a database which you have write privileges
+    to. Only one table named atommq_entry is required. This table will be
     created automagically for you if it doesn't already exist. Of course for
     that to work, you will need create table privileges. You can also create
     the table yourself if you like. Here is an example sql command for
@@ -99,8 +106,8 @@ PSGI
         use AtomMQ;
         use CGI::Emulate::PSGI;
         my $app = CGI::Emulate::PSGI->handler(sub {
-            my $dsn = 'dbi:SQLite:dbname=/path/to/foo.db';
-            my $server = AtomMQ->new(feed => 'MyCoolFeed', dsn => $dsn);
+            my $db_info = { dsn => 'dbi:SQLite:dbname=/path/to/foo.db' };
+            my $server = AtomMQ->new(feed => 'MyCoolFeed', db_info => $db_info);
             $server->run
         });
 
