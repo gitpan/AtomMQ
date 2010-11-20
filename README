@@ -2,7 +2,7 @@ NAME
     AtomMQ - An atompub server that supports the message queue/bus model.
 
 VERSION
-    version 0.0300
+    version 0.0301
 
 SYNOPSIS
         #!/usr/bin/perl
@@ -62,11 +62,9 @@ METHODS
     slightly. See "DATABASE" for more info. Example:
 
         my $server = AtomMQ->new(feed => 'MyCoolFeed', db_info => {
-            dsn        => 'dbi:SQLite:dbname=/path/to/foo.db',
-            user       => 'joe',
-            password   => 'momma',
-            AutoCommit => 1,
-            RaiseError => 1,
+            dsn      => 'dbi:SQLite:dbname=/path/to/foo.db',
+            user     => 'joe',
+            password => 'momma',
         });
 
   run
@@ -85,8 +83,8 @@ DATABASE
 
         CREATE TABLE atommq_entry (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            feed VARCHAR(255) NOT NULL,
-            title VARCHAR(255) NOT NULL,
+            feed TEXT NOT NULL,
+            title TEXT NOT NULL,
             content TEXT NOT NULL
         );
 
@@ -125,7 +123,7 @@ PSGI
     configuration:
 
         fastcgi.server += (
-            ".fcgi" => ((  "socket" => "/tmp/fcgi.sock" ))
+            ".fcgi" => (( "socket" => "/tmp/fcgi.sock" ))
         )
 
 MOTIVATION

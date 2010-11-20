@@ -8,7 +8,7 @@ use Capture::Tiny qw(capture);
 use XML::Atom;
 $XML::Atom::DefaultVersion = '1.0';
 
-our $VERSION = 0.0300;# VERSION
+our $VERSION = 0.0301;# VERSION
 
 has feed => (
     is => 'ro',
@@ -22,9 +22,7 @@ has db_info => (
 has schema => (
     is => 'ro',
     isa => 'AtomMQ::Schema',
-    lazy => 1,
-    predicate => 'has_schema',
-    default => sub { AtomMQ::Schema->connect(shift->db_info) }
+    lazy_build => 1,
 );
 has auto_create_db => (
     is => 'ro',
@@ -32,24 +30,30 @@ has auto_create_db => (
     default => 1,
 );
 
+sub _build_schema {
+    my $self = shift;
+    my $db_info = $self->db_info;
+    $db_info = { %$db_info, AutoCommit => 1, RaiseError => 1 };
+    return AtomMQ::Schema->connect($db_info);
+}
+
 sub BUILD {
     my $self = shift;
-    die "A db_info or schema param is required."
+    die "AtomMQ requires a db_info or schema parameter."
         unless $self->db_info or $self->has_schema;
     # Automagically create db table.
     capture { eval { $self->schema->deploy } } if $self->auto_create_db;
 }
-
-my %dispatch = (
-    GET  => 'get_feed',
-    POST => 'new_post',
-);
 
 sub handle_request {
     my $self = shift;
     $self->response_content_type('text/plain');
     $self->response_content_type('text/xml');
     my $method = $self->request_method || 'METHOD IS MISSING';
+    my %dispatch = (
+        GET  => 'get_feed',
+        POST => 'new_post',
+    );
     my $handler = $dispatch{$method};
     die "HTTP method [$method] is not supported\n" unless $handler;
     $self->$handler();
@@ -100,7 +104,7 @@ AtomMQ - An atompub server that supports the message queue/bus model.
 
 =head1 VERSION
 
-version 0.0300
+version 0.0301
 
 =head1 SYNOPSIS
 
@@ -169,11 +173,9 @@ Setting it to 0 improves performance slightly.
 See L</DATABASE> for more info. Example:
 
     my $server = AtomMQ->new(feed => 'MyCoolFeed', db_info => {
-        dsn        => 'dbi:SQLite:dbname=/path/to/foo.db',
-        user       => 'joe',
-        password   => 'momma',
-        AutoCommit => 1,
-        RaiseError => 1,
+        dsn      => 'dbi:SQLite:dbname=/path/to/foo.db',
+        user     => 'joe',
+        password => 'momma',
     });
 
 =head2 run
@@ -195,8 +197,8 @@ Here is an example sql command for creating the table in sqlite:
 
     CREATE TABLE atommq_entry (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        feed VARCHAR(255) NOT NULL,
-        title VARCHAR(255) NOT NULL,
+        feed TEXT NOT NULL,
+        title TEXT NOT NULL,
         content TEXT NOT NULL
     );
 
@@ -236,7 +238,7 @@ Then configure your web server accordingly. Here is an example lighttpd
 configuration:
 
     fastcgi.server += (
-        ".fcgi" => ((  "socket" => "/tmp/fcgi.sock" ))
+        ".fcgi" => (( "socket" => "/tmp/fcgi.sock" ))
     )
 
 =head1 MOTIVATION

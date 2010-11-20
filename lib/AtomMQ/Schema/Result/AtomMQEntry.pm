@@ -40,7 +40,7 @@ AtomMQ::Schema::Result::AtomMQEntry
 
 =head1 VERSION
 
-version 0.0300
+version 0.0301
 
 =head1 ACCESSORS
 

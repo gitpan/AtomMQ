@@ -31,7 +31,7 @@ my %WriteMakefileArgs = (
     'Test::MockObject' => '0',
     'XML::Atom' => '0'
   },
-  'VERSION' => '0.0300',
+  'VERSION' => '0.0301',
   'test' => {
     'TESTS' => 't/*.t'
   }
