@@ -8,13 +8,8 @@ use Capture::Tiny qw(capture);
 use XML::Atom;
 $XML::Atom::DefaultVersion = '1.0';
 
-our $VERSION = 0.0301;# VERSION
+our $VERSION = 1.0000;# VERSION
 
-has feed => (
-    is => 'ro',
-    isa => 'Str',
-    required => 1,
-);
 has db_info => (
     is => 'ro',
     isa => 'HashRef[Str]',
@@ -39,7 +34,7 @@ sub _build_schema {
 
 sub BUILD {
     my $self = shift;
-    die "AtomMQ requires a db_info or schema parameter."
+    die "The AtomMQ constructor requires a db_info or schema parameter."
         unless $self->db_info or $self->has_schema;
     # Automagically create db table.
     capture { eval { $self->schema->deploy } } if $self->auto_create_db;
@@ -47,7 +42,6 @@ sub BUILD {
 
 sub handle_request {
     my $self = shift;
-    $self->response_content_type('text/plain');
     $self->response_content_type('text/xml');
     my $method = $self->request_method || 'METHOD IS MISSING';
     my %dispatch = (
@@ -56,13 +50,14 @@ sub handle_request {
     );
     my $handler = $dispatch{$method};
     die "HTTP method [$method] is not supported\n" unless $handler;
-    $self->$handler();
+    my $feed_name = $self->request_param('feed');
+    die 'A feed param is required in the uri, e.g., /atommq/feed=widgets'
+        unless defined $feed_name and $feed_name ne '';
+    $self->$handler($feed_name);
 }
 
 sub get_feed {
-    my $self = shift;
-    my $feed_name = $self->feed;
-    #my $p = $self->request_param('start-index');
+    my ($self, $feed_name) = @_;
     my $last_id = $self->request_header('Xlastid') || 0;
     my $feed = XML::Atom::Feed->new;
     $feed->title($feed_name);
@@ -81,19 +76,19 @@ sub get_feed {
 }
 
 sub new_post {
-    my $self = shift;
-    my $entry = $self->atom_body or return;
+    my ($self, $feed_name) = @_;
+    my $entry = $self->atom_body or die "Atom content is missing";
     $self->schema->resultset('AtomMQEntry')->create({
-        feed    => $self->feed,
+        feed    => $feed_name,
         title   => $entry->title,
         content => $entry->content->body,
     });
 }
 
-1;
-
 # ABSTRACT: An atompub server that supports the message queue/bus model.
 
+
+1;
 
 __END__
 =pod
@@ -104,42 +99,47 @@ AtomMQ - An atompub server that supports the message queue/bus model.
 
 =head1 VERSION
 
-version 0.0301
+version 1.0000
 
 =head1 SYNOPSIS
 
     #!/usr/bin/perl
     use AtomMQ;
     my $db_info = { dsn => 'dbi:SQLite:dbname=/path/to/foo.db' };
-    my $server = AtomMQ->new(feed => 'MyCoolFeed', db_info => $db_info);
+    my $server = AtomMQ->new(db_info => $db_info);
     $server->run;
 
 =head1 DESCRIPTION
 
 AtomMQ is an atompub server that supports the message queue/bus model.
-Throughout this document, I will use the term message when refering to an atom
+Throughout this document, I will use the term message when referring to an atom
 feed entry, since the point of this module is to use atompub for messaging.
+The idea is that atom feeds correspond to conceptual queues (or buses) and atom
+entries correspond to messages.
 AtomMQ extends Inoue's L<Atompub::Server> which extends Miyagawa's
 L<XML::Atom::Server>.
 Can you feel the love already?
 
-To get started, just copy the code from the L</SYNOPSIS> to a file.
-You now have a shiny new atompub server with a feed named MyCoolFeed.
-You can configure your web server to run it via CGI or as a mod_perl handler.
-My recommendation is to run it in a L<PSGI> environment.
-See the L</PSGI> section for directions.
-To create more feeds, just copy that file and change 'MyCoolFeed' to
-'MyOtherFeed'.
+To create an AtomMQ server, just copy the code from the L</SYNOPSIS>.
+Make sure to change the dsn to something valid and chmod +x the file.
+Right away you can run it via CGI or as a mod_perl handler.
+To run in a FastCGI or L<PSGI> environment, see the L</FastCGI> and L</PSGI>
+sections in this document.
+This is highly recommended because it will run considerably faster.
 
-To publish a message to AtomMQ, make a HTTP POST request:
+These examples assume that you have configured your web server to point http
+requests starting with /atommq to the script you just created.
+To publish a message, make a HTTP POST request:
 
     $ curl -d '<entry> <title>allo</title> <content type="xhtml">
       <div xmlns="http://www.w3.org/1999/xhtml" >an important message</div>
-      </content> </entry>' http://localhost/cgi-bin/mycoolfeed
+      </content> </entry>' http://localhost/atommq/feed=widgets
 
-To retrieve messages, make a HTTP GET request:
+That adds a new message to a feed titled widgets.
+If that feed didn't exist before, it will be created for you.
+To retrieve messages from the widgets feed, make a HTTP GET request:
 
-    $ curl http://localhost/cgi-bin/mycoolfeed
+    $ curl http://localhost/atommq/feed=widgets
 
 That will get all the messages since the feed was created.
 Lets say you are running a client that polls the feed and processes messages.
@@ -151,7 +151,7 @@ This allows a client to request only messages that came after the message with
 the given id.
 They can do this by passing a Xlastid header:
 
-    $ curl -H 'Xlastid: 42' http://localhost/cgi-bin/mycoolfeed
+    $ curl -H 'Xlastid: 42' http://localhost/atommq/feed=widgets
 
 That will return only messages that came after the message that had id 42.
 
@@ -159,10 +159,9 @@ That will return only messages that came after the message that had id 42.
 
 =head2 new
 
-Arguments: $feed, $db_info, $auto_create_db
+Arguments: \%db_info [, $auto_create_db]
 
-This is the AtomMQ constructor. The required arguments are $feed and $db_info.
-$feed is the name of the feed.
+This is the AtomMQ constructor. Only $db_info is required.
 $db_info is a hashref containing the database connection info as described
 in L<DBIx::Class::Storage::DBI/connect_info>.
 It must at least contain a dsn entry.
@@ -172,11 +171,13 @@ You can leave it set to 1 even if the db table already exists.
 Setting it to 0 improves performance slightly.
 See L</DATABASE> for more info. Example:
 
-    my $server = AtomMQ->new(feed => 'MyCoolFeed', db_info => {
-        dsn      => 'dbi:SQLite:dbname=/path/to/foo.db',
-        user     => 'joe',
-        password => 'momma',
-    });
+    my $server = AtomMQ->new(auto_create_db => 0,
+        db_info => {
+            dsn      => 'dbi:SQLite:dbname=/path/to/foo.db',
+            user     => 'joe',
+            password => 'momma',
+        }
+    );
 
 =head2 run
 
@@ -207,39 +208,55 @@ be any size you want.
 All databases supported by L<DBIx::Class> are supported,
 which are most major databases including postgresql, sqlite, mysql and oracle.
 
-=head1 PSGI
+=head1 FastCGI
 
-If you have the need for speed, then this section is for you.
-AtomMQ can be run in a persistent L<PSGI> environment via L<Plack>.
-This is the recommended way to run AtomMQ, but it takes slightly more work.
-You will need to have L<Plack> and L<CGI::Emulate::PSGI> installed.
-Copy the following to mycoolfeed.fcgi:
+CGI can be very slow. Not to worry, AtomMQ can be run via FastCGI.
+This requires that you have the L<FCGI> module installed.
 
     #!/usr/bin/perl
     use AtomMQ;
-    use CGI::Emulate::PSGI;
-    my $app = CGI::Emulate::PSGI->handler(sub {
-        my $db_info = { dsn => 'dbi:SQLite:dbname=/path/to/foo.db' };
-        my $server = AtomMQ->new(feed => 'MyCoolFeed', db_info => $db_info);
-        $server->run
-    });
+    use FCGI;
 
-Then you can run:
+    my $db_info = { dsn => "dbi:SQLite:dbname=/path/to/foo.db" };
+    my $request = FCGI::Request();
+    while($request->Accept() >= 0) {
+        my $server = AtomMQ->new(db_info => $db_info);
+        $server->run;
+    }
 
-    plackup -p 5000 mycoolfeed.fcgi
-
-Now AtomMQ is running on port 5000 via the L<HTTP::Server::PSGI> web server.
-If you want to run in a FastCGI environment using your favorite web server,
-then you can run:
-
-    plackup -s FCGI --listen /tmp/fcgi.sock mycoolfeed.fcgi
-
-Then configure your web server accordingly. Here is an example lighttpd
-configuration:
+Here is an example lighttpd config.
+It assumes you named the above file atommq.fcgi.
+Make sure you chmod +x atommq.fcgi.
 
     fastcgi.server += (
-        ".fcgi" => (( "socket" => "/tmp/fcgi.sock" ))
+        "/atommq" => ((
+            "socket" => "/tmp/fcgi.sock",
+            "check-local" => "disable",
+            "bin-path" => "/path/to/atommq.fcgi",
+        )),
     )
+
+Now AtomMQ will be running via FastCGI under /atommq.
+
+=head1 PSGI
+
+AtomMQ can also be run in a L<PSGI> environment via L<Plack>.
+Here is one way to do it.
+You will need to have L<Plack>, L<CGI::Emulate::PSGI> and L<CGI::Compile>
+installed for this example.
+Copy the following to atommq.psgi.
+
+    use Plack::App::WrapCGI;
+    my $app = Plack::App::WrapCGI->new(script => "/path/to/atommq.cgi")->to_app;
+
+The "/path/to/atommq.cgi" string should be changed to the path to a cgi script
+such as the one in the L</SYNOPSIS>.
+Then you can for example run:
+
+    plackup -p 5000 atommq.psgi
+
+Now AtomMQ is running on port 5000 via the L<HTTP::Server::PSGI> web server.
+Of course you can use any PSGI/Plack web server via the -s option to plackup.
 
 =head1 MOTIVATION
 
@@ -251,7 +268,7 @@ I needed a system to publish events such that multiple heterogeneous services
 could subscribe to them.
 So I really needed a message bus, not a message queue.
 I know for example I could have used something called topics in ActiveMQ,
-but they are extremely flakey in my experience.
+but I have found them to have issues with persistence.
 Actually, I have found ActiveMQ to be broken in general.
 An instance I manage has to be restarted at least twice a week.
 AtomMQ on the other hand will be extremely stable, because it is so simple.
