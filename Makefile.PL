@@ -20,7 +20,7 @@ my %WriteMakefileArgs = (
   'LICENSE' => 'perl',
   'NAME' => 'AtomMQ',
   'PREREQ_PM' => {
-    'Atompub::Server' => '0',
+    'Atompub' => '0',
     'Capture::Tiny' => '0',
     'DBD::SQLite' => '0',
     'DBIx::Class' => '0.08115',
@@ -29,9 +29,10 @@ my %WriteMakefileArgs = (
     'SQL::Translator' => '0.11006',
     'Test::Exception' => '0',
     'Test::MockObject' => '0',
+    'UUID::Tiny' => '0.02',
     'XML::Atom' => '0'
   },
-  'VERSION' => '1.0000',
+  'VERSION' => '1.0100',
   'test' => {
     'TESTS' => 't/*.t'
   }

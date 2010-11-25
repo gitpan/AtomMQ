@@ -16,7 +16,7 @@ AtomMQ::Schema
 
 =head1 VERSION
 
-version 1.0000
+version 1.0100
 
 =head1 AUTHOR
 
