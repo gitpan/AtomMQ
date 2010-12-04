@@ -6,14 +6,12 @@ extends 'Atompub::Server';
 use AtomMQ::Schema;
 use Atompub::DateTime qw(datetime);
 use Capture::Tiny qw(capture);
-#use DateTime;
-use Data::Dumper;
 use UUID::Tiny;
 use XML::Atom;
 $XML::Atom::DefaultVersion = '1.0';
 use XML::Atom::Person;
 
-our $VERSION = 1.0100;# VERSION
+our $VERSION = 1.0200;# VERSION
 
 has db_info => (
     is => 'ro',
@@ -29,6 +27,11 @@ has auto_create_db => (
     isa => 'Bool',
     default => 1,
 );
+has max_msgs_per_request => (
+    is => 'ro',
+    isa => 'Int',
+    default => 100,
+);
 
 sub _build_schema {
     my $self = shift;
@@ -41,8 +44,8 @@ sub BUILD {
     my $self = shift;
     die "The AtomMQ constructor requires a db_info or schema parameter."
         unless $self->db_info or $self->has_schema;
-    # Automagically create db table.
-    $self->schema->deploy if $self->auto_create_db;
+    # Automagically create db.
+    capture { $self->schema->deploy } if $self->auto_create_db;
     #capture { eval { $self->schema->deploy } } if $self->auto_create_db;
 }
 
@@ -96,7 +99,8 @@ sub get_feed {
     $query{order_id} = { '>' => $order_id } if $order_id;
     my $rset = $self->schema->resultset('AtomMQEntry')->search(
         \%query, { order_by => ['order_id'] });
-    while (my $entry = $rset->next) {
+    my $count = $self->max_msgs_per_request;
+    while ($count-- && (my $entry = $rset->next)) {
         $feed->add_entry(_entry_from_db($entry));
     }
 
@@ -155,11 +159,10 @@ AtomMQ - An atompub server that supports the message queue/bus model.
 
 =head1 VERSION
 
-version 1.0100
+version 1.0200
 
 =head1 SYNOPSIS
 
-    #!/usr/bin/perl
     use AtomMQ;
     my $db_info = { dsn => 'dbi:SQLite:dbname=/path/to/foo.db' };
     my $server = AtomMQ->new(db_info => $db_info);
@@ -177,8 +180,8 @@ L<XML::Atom::Server>.
 Can you feel the love already?
 
 To create an AtomMQ server, just copy the code from the L</SYNOPSIS>.
-Make sure to change the dsn to something valid and chmod +x the file.
-Right away you can run it via CGI or as a mod_perl handler.
+Make sure to change the dsn to something valid.
+You can run it via CGI or as a mod_perl handler.
 To run in a FastCGI or L<PSGI> environment, see the L</FastCGI> and L</PSGI>
 sections in this document.
 This is highly recommended because it will run considerably faster.
@@ -213,19 +216,29 @@ They can do this by passing a Xlastid header:
 
 =head2 new
 
-Arguments: \%db_info [, $auto_create_db]
+Arguments: \%db_info, $auto_create_db, $max_msgs_per_request
 
 This is the AtomMQ constructor. Only $db_info is required.
 $db_info is a hashref containing the database connection info as described
 in L<DBIx::Class::Storage::DBI/connect_info>.
 It must at least contain a dsn entry.
 $auto_create_db defaults to 1.
-Set it to 0 if you don't want AtomMQ to attempt to create the db table for you.
-You can leave it set to 1 even if the db table already exists.
+Set it to 0 if you don't want AtomMQ to attempt to create the db tables for you.
+You can leave it set to 1 even if the db tables already exist.
 Setting it to 0 improves performance slightly.
+$max_msgs_per_request defaults to 100.
+This default value may change in future versions, so you may want to set it
+explicitly.
+It determines the maximum number of messages returned by the server for a GET
+request.
+So if there were 1000 messages, a GET request will return messages 1 - 100.
+To get messages 101 - 200, you should provide the id of message 100 in
+the next GET request via the Xlastid header, as shown above.
 See L</DATABASE> for more info. Example:
 
-    my $server = AtomMQ->new(auto_create_db => 0,
+    my $server = AtomMQ->new(
+        auto_create_db => 0,
+        max_msgs_per_request => 100,
         db_info => {
             dsn      => 'dbi:SQLite:dbname=/path/to/foo.db',
             user     => 'joe',

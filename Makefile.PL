@@ -32,7 +32,7 @@ my %WriteMakefileArgs = (
     'UUID::Tiny' => '0.02',
     'XML::Atom' => '0'
   },
-  'VERSION' => '1.0100',
+  'VERSION' => '1.0200',
   'test' => {
     'TESTS' => 't/*.t'
   }

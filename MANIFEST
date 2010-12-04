@@ -11,3 +11,4 @@ lib/AtomMQ/Schema.pm
 lib/AtomMQ/Schema/Result/AtomMQEntry.pm
 lib/AtomMQ/Schema/Result/AtomMQFeed.pm
 t/01-basic.t
+t/02-max-msgs.t

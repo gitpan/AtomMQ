@@ -39,7 +39,7 @@ AtomMQ::Schema::Result::AtomMQEntry
 
 =head1 VERSION
 
-version 1.0100
+version 1.0200
 
 =head1 NAME
 
