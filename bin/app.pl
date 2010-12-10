@@ -1,18 +1,15 @@
-package AtomMQ::Schema;
-use strict;
-use warnings;
-use base 'DBIx::Class::Schema';
-
-__PACKAGE__->load_namespaces;
-
-1;
+#!/usr/bin/env perl
+package main;
+use Dancer;
+use AtomMQ;
+dance;
 
 __END__
 =pod
 
 =head1 NAME
 
-AtomMQ::Schema
+main
 
 =head1 VERSION
 

@@ -39,7 +39,7 @@ AtomMQ::Schema::Result::AtomMQEntry
 
 =head1 VERSION
 
-version 1.0200
+version 1.0300
 
 =head1 NAME
 
@@ -47,17 +47,17 @@ AtomMQ::Schema::Result::AtomMQEntry
 
 =head1 ACCESSORS
 
+=head2 order_id
+
+  data_type: 'integer'
+  is_nullable: 0
+  is_auto_increment: 1
+
 =head2 id
 
   data_type: 'varchar'
   is_nullable: 0
   size: 100
-
-=head2 order
-
-  data_type: 'integer'
-  is_nullable: 0
-  is_auto_increment: 1
 
 =head2 feed_title
 

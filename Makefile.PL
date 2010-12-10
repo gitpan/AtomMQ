@@ -16,7 +16,9 @@ my %WriteMakefileArgs = (
     'ExtUtils::MakeMaker' => '6.31'
   },
   'DISTNAME' => 'AtomMQ',
-  'EXE_FILES' => [],
+  'EXE_FILES' => [
+    'bin/app.pl'
+  ],
   'LICENSE' => 'perl',
   'NAME' => 'AtomMQ',
   'PREREQ_PM' => {
@@ -24,15 +26,14 @@ my %WriteMakefileArgs = (
     'Capture::Tiny' => '0',
     'DBD::SQLite' => '0',
     'DBIx::Class' => '0.08115',
-    'Moose' => '0',
-    'MooseX::NonMoose' => '0',
+    'Dancer' => '1.2002',
+    'Dancer::Plugin::DBIC' => '0.1504',
     'SQL::Translator' => '0.11006',
-    'Test::Exception' => '0',
-    'Test::MockObject' => '0',
     'UUID::Tiny' => '0.02',
-    'XML::Atom' => '0'
+    'XML::Atom' => '0',
+    'XML::XPath' => '0'
   },
-  'VERSION' => '1.0200',
+  'VERSION' => '1.0300',
   'test' => {
     'TESTS' => 't/*.t'
   }
