@@ -1,5 +1,9 @@
 Revision history for AtomMQ
 
+1.0301  2010-12-11
+        Fixed a bug that breaks app in FCGI environment if Capture::Tiny
+        is used inside the before filter to silence deploying the schema.
+
 1.0300  2010-12-10
         AtomMQ is now a Dancer app, hooray!
         A bunch of junk went away now that we are using Dancer.

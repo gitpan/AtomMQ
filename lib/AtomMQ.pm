@@ -3,18 +3,17 @@ use Dancer qw(:syntax);
 use Dancer::Plugin::DBIC qw(schema);
 
 use Atompub::DateTime qw(datetime);
-use Capture::Tiny qw(capture);
 use UUID::Tiny;
 use XML::Atom;
 $XML::Atom::DefaultVersion = '1.0';
 
-our $VERSION = 1.0300;# VERSION
+our $VERSION = 1.0301;# VERSION
 
 my $deployed = 0;
 before sub {
     # Automagically create db if it doesn't exist.
     return if $deployed;
-    capture { schema->deploy };
+    eval { schema->deploy }; # Fails gracefully if tables already exist.
     $deployed = 1;
 };
 
@@ -109,7 +108,7 @@ AtomMQ - An atompub server that supports the message queue/bus model.
 
 =head1 VERSION
 
-version 1.0300
+version 1.0301
 
 =head1 SYNOPSIS
 

@@ -13,7 +13,7 @@ main
 
 =head1 VERSION
 
-version 1.0300
+version 1.0301
 
 =head1 AUTHOR
 

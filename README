@@ -2,7 +2,7 @@ NAME
     AtomMQ - An atompub server that supports the message queue/bus model.
 
 VERSION
-    version 1.0300
+    version 1.0301
 
 SYNOPSIS
         use Dancer;
