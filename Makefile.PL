@@ -9,7 +9,7 @@ use ExtUtils::MakeMaker 6.31;
 
 
 my %WriteMakefileArgs = (
-  'ABSTRACT' => 'An atompub server that supports the message queue/bus model.',
+  'ABSTRACT' => 'An AtomPub server for messaging.',
   'AUTHOR' => 'Naveed Massjouni <naveed.massjouni@rackspace.com>',
   'BUILD_REQUIRES' => {},
   'CONFIGURE_REQUIRES' => {
@@ -33,7 +33,7 @@ my %WriteMakefileArgs = (
     'XML::Atom' => '0',
     'XML::XPath' => '0'
   },
-  'VERSION' => '1.0400',
+  'VERSION' => '1.0401',
   'test' => {
     'TESTS' => 't/*.t'
   }

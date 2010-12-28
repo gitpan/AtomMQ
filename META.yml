@@ -1,5 +1,5 @@
 ---
-abstract: 'An atompub server that supports the message queue/bus model.'
+abstract: 'An AtomPub server for messaging.'
 author:
   - 'Naveed Massjouni <naveed.massjouni@rackspace.com>'
 build_requires: {}
@@ -26,4 +26,4 @@ requires:
 resources:
   bugtracker: http://github.com/ironcamel/AtomMQ/issues
   repository: git://github.com/ironcamel/AtomMQ.git
-version: 1.0400
+version: 1.0401
