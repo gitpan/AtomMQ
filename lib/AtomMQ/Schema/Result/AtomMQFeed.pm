@@ -34,7 +34,7 @@ AtomMQ::Schema::Result::AtomMQFeed
 
 =head1 VERSION
 
-version 1.0301
+version 1.0400
 
 =head1 NAME
 
