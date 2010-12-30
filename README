@@ -2,7 +2,7 @@ NAME
     AtomMQ - An AtomPub server for messaging.
 
 VERSION
-    version 1.0401
+    version 1.0402
 
 SYNOPSIS
         use Dancer;
@@ -17,7 +17,7 @@ DESCRIPTION
 
     These examples assume that you have configured your web server to point
     HTTP requests starting with /atommq to your AtomMQ server (see
-    "Deployment"). To publish an entry, make a HTTP POST request:
+    "DEPLOYMENT"). To publish an entry, make a HTTP POST request:
 
         $ curl -d '<entry> <title>allo</title> <content type="xhtml">
           <div xmlns="http://www.w3.org/1999/xhtml" >an important message</div>
@@ -33,12 +33,12 @@ DESCRIPTION
     processed. They can do this by providing the id of the last message as
     the start_after parameter:
 
-        $ curl -H http://localhost/atommq/feeds/widgets?start_after=42
+        $ curl http://localhost/atommq/feeds/widgets?start_after=42
 
     Alternatively, you can provide a start_at param. This will retrieve
     entries starting with the given id:
 
-        $ curl -H http://localhost/atommq/feeds/widgets?start_at=42
+        $ curl http://localhost/atommq/feeds/widgets?start_at=42
 
     HTTP ETags are also supported. The server responds with an ETag header
     for each request. The client can provide that ETag as the If-None-Match
@@ -78,7 +78,7 @@ CONFIGURATION
                 atommq:
                     dsn: 'dbi:mysql:database=atommq'
                     user: joe
-                    password: momma
+                    pass: momma
 
     You can alternatively configure the server via the 'set' keyword in the
     source code. This approach does not require a config file.
@@ -140,14 +140,12 @@ DEPLOYMENT
 
     Now AtomMQ will be running via FastCGI under /atommq.
 
-  PSGI
-    AtomMQ can be run in a PSGI environment via Plack. You will need to have
-    Plack installed. To deploy AtomMQ, just run:
+  Plack
+    AtomMQ can be run with any Plack web server. Just run:
 
         plackup atommq.pl
 
-    Now AtomMQ is running via the HTTP::Server::PSGI web server. Of course
-    you can use any PSGI/Plack web server via the -s option to plackup.
+    You can change the Plack web server via the -s option to plackup.
 
 MOTIVATION
     I like messaging systems because they make it so easy to create scalable

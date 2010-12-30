@@ -16,9 +16,7 @@ my %WriteMakefileArgs = (
     'ExtUtils::MakeMaker' => '6.31'
   },
   'DISTNAME' => 'AtomMQ',
-  'EXE_FILES' => [
-    'bin/app.pl'
-  ],
+  'EXE_FILES' => [],
   'LICENSE' => 'perl',
   'NAME' => 'AtomMQ',
   'PREREQ_PM' => {
@@ -33,7 +31,7 @@ my %WriteMakefileArgs = (
     'XML::Atom' => '0',
     'XML::XPath' => '0'
   },
-  'VERSION' => '1.0401',
+  'VERSION' => '1.0402',
   'test' => {
     'TESTS' => 't/*.t'
   }
